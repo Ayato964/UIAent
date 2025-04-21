@@ -5,14 +5,14 @@ from tkinter import messagebox
 from modules.agent import thinking
 from modules.gemini import GeminiClient
 from modules.prompt import  JSON_PROMPT, Flash_Prompt, JOB_Prompt
-
+from modules.my_azure import get_client
 
 class UIAIAgent:
-    def __init__(self, gemini_reason: GeminiClient, gemini_json: GeminiClient, w, h):
+    def __init__(self, gemini_reason: GeminiClient, azure_client, w, h):
         self.root = tk.Tk()
         self.root.title("UI Agent Client")
         self.gemini = gemini_reason
-        self.gemini_json = gemini_json
+        self.azure_client = azure_client
         self.events = dict()
         # 画面の幅と高さを取得
         screen_width = self.root.winfo_screenwidth()
@@ -41,7 +41,7 @@ class UIAIAgent:
 
         # ボタンの作成
         button = tk.Button(self.root, text="送信",
-                           command=lambda : threading.Thread(target=thinking, args=(entry.get(), self.gemini, self.gemini_json)).start(), font=("Arial", 14))
+                           command=lambda : threading.Thread(target=thinking, args=(entry.get(), self.gemini, self.azure_client)).start(), font=("Arial", 14))
         button.pack(pady=10)
         self.root.mainloop()
 
@@ -53,8 +53,8 @@ if __name__ == "__main__":
         data = json.load(file)
         api_key = data["token"]
         gemini_client = GeminiClient(api_key=api_key, model=data["flash"], prompt=JOB_Prompt)
-        gemini_json = GeminiClient(api_key=api_key, model = data["json"],   prompt=JSON_PROMPT)
+        client = get_client("./config/azure.json")
         print("Gemini Client initialized.")
 
-        UI = UIAIAgent(gemini_client, gemini_json, 400, 150)
+        UI = UIAIAgent(gemini_client, client, 400, 150)
         UI()

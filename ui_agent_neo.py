@@ -9,15 +9,16 @@ from tkinter import messagebox
 from modules.agent import thinking
 from modules.gemini import GeminiClient
 from modules.prompt import JSON_PROMPT, Flash_Prompt
+from modules.my_azure import get_client
 
 import pyautogui as pg
 
 class UIAIAgent(tk.Tk):
-    def __init__(self, gemini_reason: GeminiClient, gemini_json: GeminiClient, w, h):
+    def __init__(self, gemini_reason: GeminiClient, azure_client, w, h, ):
         super().__init__()
         self.title("UI Agent Client")
         self.gemini = gemini_reason
-        self.gemini_json = gemini_json
+        self.azure_client = azure_client
 
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
@@ -106,7 +107,7 @@ class MainPage(tk.Frame):
                            command=lambda: threading.Thread(
                                target=thinking,
                                args=(f"PDFとプロンプトを厳守し、{entry.get()}というクレーム番号を検索条件として、査定情報を取得してください。",
-                                     master.gemini, master.gemini_json)
+                                     master.gemini, master.azure_client)
                            ).start())
         button.pack(pady=10)
 
@@ -115,8 +116,8 @@ if __name__ == "__main__":
         data = json.load(file)
         api_key = data["token"]
         gemini_client = GeminiClient(api_key=api_key, model=data["reason"], prompt=Flash_Prompt, is_ui_prompt=True)
-        gemini_json = GeminiClient(api_key=api_key, model=data["json"], prompt=JSON_PROMPT)
+        client = get_client("./config/azure.json")
         print("Gemini Client initialized.")
 
-        UI = UIAIAgent(gemini_client, gemini_json, 400, 150)
+        UI = UIAIAgent(gemini_client, client, 400, 150)
         UI.mainloop()
