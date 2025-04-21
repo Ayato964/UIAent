@@ -4,6 +4,17 @@ from time import sleep
 from .my_azure import find_text_position
 import pyautogui as pg
 
+
+STATES =0
+
+_WAITING =1
+_THINKING =2
+_ACTION = 3
+
+
+_ERROR =-1
+
+
 def _duble_click(target: dict):
     """
     中点を求める
@@ -73,17 +84,34 @@ def thinking(input_text: str, gemini_reason, azure_client):
         path = f"data/screenshots/sc_{count}.png"
         screenshot.save(path)
         sleep(1)
+
+        #指示の生成
+        STATES = _THINKING
         prompt = gemini_reason.generate(input_text=input_text, image_path=path)
-        act = re.search(r"<Action>(.*?)</Action>", prompt, re.DOTALL)
-        act = act.group(1).strip()
-        prompt = re.search(r"<Prompt>(.*?)</Prompt>", prompt, re.DOTALL).group(1).strip()
 
-        feedback = find_text_position(azure_client, prompt)
-        print(feedback)
+        if "<END>" in prompt:
+            is_thinking = False
+            STATES = _WAITING
+        else:
+            try:
+                act = re.search(r"<Action>(.*?)</Action>", prompt, re.DOTALL)
+                act = act.group(1).strip()
+                prompt = re.search(r"<Prompt>(.*?)</Prompt>", prompt, re.DOTALL).group(1).strip()
 
-        js = text_to_json(feedback, act)
-        print(f"FeedBack: {js}")
-        action(js)
-        count += 1
-        input_text = "Next Action"
-        sleep(1)
+                feedback = find_text_position(azure_client, prompt)
+
+                if feedback is None:
+                    input_text = f"「{prompt}」という文字列は画像にありません。 Next Actiom"
+                else:
+                    js = text_to_json(feedback, act)
+                    STATES = _ACTION
+                    print(f"FeedBack: {js}")
+                    action(js)
+                    input_text = "Next Action"
+                    sleep(1)
+                count += 1
+            except AttributeError as ae:
+                print("エラーです。\nやり直します。")
+                input_text = "That Prompt is Error. So try again."
+                count += 1
+                STATES = _ERROR

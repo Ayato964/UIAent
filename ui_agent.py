@@ -52,7 +52,7 @@ if __name__ == "__main__":
     with open("./config/token.json", "r") as file:
         data = json.load(file)
         api_key = data["token"]
-        gemini_client = GeminiClient(api_key=api_key, model=data["flash"], prompt=JOB_Prompt)
+        gemini_client = GeminiClient(api_key=api_key, model=data["reason"], prompt=Flash_Prompt)
         client = get_client("./config/azure.json")
         print("Gemini Client initialized.")
 
