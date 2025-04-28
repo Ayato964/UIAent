@@ -16,15 +16,14 @@ class GeminiClient:
                 types.Content(
                     role="user",
                     parts=[
-                        types.Part.from_uri(file_uri=file.uri, mime_type=file.mime_type),
+                        #types.Part.from_uri(file_uri=file.uri, mime_type=file.mime_type),
                         types.Part.from_text(text=prompt),
                     ],
                 ),
                 types.Content(
                     role="model",
                     parts=[
-                        types.Part.from_text(text="""はい、よろしいです。内容を全て把握しました、プロンプトが入力されたらスクリーンショットの内容を詳細に分析します。 
-                        \"Next Action\" にも適切に対応し、タスク完了まで繰り返し指示を生成します。
+                        types.Part.from_text(text="""承知いたしました。命令とスクリーンショットの画像をよく読み、ユーザーの指示に沿った指示とUI操作をエージェントに出力します。
                                         """),
                     ],
                 ),
@@ -40,9 +39,9 @@ class GeminiClient:
                 types.Content(
                     role="model",
                     parts=[
-                        types.Part.from_text(text="""はい、よろしいです。タスクの指示と考慮事項、AIエージェントへの指示方法、JSON形式、そしてタスク完了時の対応について理解しました。
-                                                                タスクが入力されましたら、スクリーンショットの内容を詳細に分析します。 \"Next Action\" にも適切に対応し、タスク完了まで繰り返し指示を生成します。
-                                                    """),
+                        types.Part.from_text(text="""
+                        承知いたしました。命令の内容とスクリーンショットの画像をよく読み、ユーザーの指示に沿った指示とUI操作をエージェントに出力します。
+                        """),
                     ],
                 ),
             ]
